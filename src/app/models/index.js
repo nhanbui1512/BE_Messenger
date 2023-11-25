@@ -2,6 +2,7 @@ const { Sequelize, DataTypes, Op, fn } = require("sequelize");
 const User = require("./user");
 const RoomChat = require("./roomChat");
 const Message = require("./message");
+const UserRoomchat = require("./userRoomchat");
 
 const sequelize = new Sequelize("messenger", "root", "", {
   host: "localhost",
@@ -16,6 +17,7 @@ const sequelize = new Sequelize("messenger", "root", "", {
 const UserModel = User(sequelize);
 const RoomChatModal = RoomChat(sequelize);
 const MessageModal = Message(sequelize);
+const UserRoomchatModal = UserRoomchat(sequelize);
 
 //realationship
 
@@ -32,5 +34,8 @@ RoomChatModal.hasMany(MessageModal, {
 MessageModal.belongsTo(RoomChatModal, {
   onDelete: "CASCADE",
 });
+
+UserModel.belongsToMany(RoomChatModal, { through: UserRoomchatModal });
+RoomChatModal.belongsToMany(UserModel, { through: UserRoomchatModal });
 
 module.exports = { sequelize, UserModel, RoomChatModal, MessageModal };
