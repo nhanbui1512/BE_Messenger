@@ -51,10 +51,7 @@ const User = (sequelize) => {
       type: DataTypes.VIRTUAL,
       get() {
         const time = this.getDataValue("updateAt");
-        if (time != null) return timeFormat(time);
-        else {
-          return time;
-        }
+        return time;
       },
     },
   });

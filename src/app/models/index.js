@@ -38,4 +38,10 @@ MessageModal.belongsTo(RoomChatModal, {
 UserModel.belongsToMany(RoomChatModal, { through: UserRoomchatModal });
 RoomChatModal.belongsToMany(UserModel, { through: UserRoomchatModal });
 
-module.exports = { sequelize, UserModel, RoomChatModal, MessageModal };
+module.exports = {
+  sequelize,
+  UserModel,
+  RoomChatModal,
+  MessageModal,
+  UserRoomchatModal,
+};
