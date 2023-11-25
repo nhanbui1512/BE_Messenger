@@ -7,6 +7,13 @@ const UserRoomchat = (sequelize) => {
       primaryKey: true,
       autoIncrement: true,
     },
+    joinAt: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
+    leaveAt: {
+      type: DataTypes.DATE,
+    },
   });
 };
 module.exports = UserRoomchat;
