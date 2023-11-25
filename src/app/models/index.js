@@ -1,8 +1,8 @@
 const { Sequelize, DataTypes, Op, fn } = require("sequelize");
-const User = require("./user");
-const RoomChat = require("./roomChat");
-const Message = require("./message");
-const UserRoomchat = require("./userRoomchat");
+const User = require("./userModel");
+const RoomChat = require("./roomChatModel");
+const Message = require("./messageModel");
+const UserRoomchat = require("./userRoomchatModel");
 
 const sequelize = new Sequelize("messenger", "root", "", {
   host: "localhost",
