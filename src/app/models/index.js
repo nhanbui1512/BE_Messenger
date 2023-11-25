@@ -15,33 +15,33 @@ const sequelize = new Sequelize("messenger", "root", "", {
 });
 
 const UserModel = User(sequelize);
-const RoomChatModal = RoomChat(sequelize);
-const MessageModal = Message(sequelize);
-const UserRoomchatModal = UserRoomchat(sequelize);
+const RoomChatModel = RoomChat(sequelize);
+const MessageModel = Message(sequelize);
+const UserRoomchatModel = UserRoomchat(sequelize);
 
 //realationship
 
-UserModel.hasMany(MessageModal, {
+UserModel.hasMany(MessageModel, {
   onDelete: "CASCADE",
 });
-MessageModal.belongsTo(UserModel, {
-  onDelete: "CASCADE",
-});
-
-RoomChatModal.hasMany(MessageModal, {
-  onDelete: "CASCADE",
-});
-MessageModal.belongsTo(RoomChatModal, {
+MessageModel.belongsTo(UserModel, {
   onDelete: "CASCADE",
 });
 
-UserModel.belongsToMany(RoomChatModal, { through: UserRoomchatModal });
-RoomChatModal.belongsToMany(UserModel, { through: UserRoomchatModal });
+RoomChatModel.hasMany(MessageModel, {
+  onDelete: "CASCADE",
+});
+MessageModel.belongsTo(RoomChatModel, {
+  onDelete: "CASCADE",
+});
+
+UserModel.belongsToMany(RoomChatModel, { through: UserRoomchatModel });
+RoomChatModel.belongsToMany(UserModel, { through: UserRoomchatModel });
 
 module.exports = {
   sequelize,
   UserModel,
-  RoomChatModal,
-  MessageModal,
-  UserRoomchatModal,
+  RoomChatModel,
+  MessageModel,
+  UserRoomchatModel,
 };
