@@ -1,4 +1,6 @@
-const User = (sequelize, DataTypes) => {
+const { DataTypes } = require("sequelize");
+
+const User = (sequelize) => {
   return sequelize.define("users", {
     userId: {
       type: DataTypes.INTEGER,
@@ -28,7 +30,7 @@ const User = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       get() {
         const avatar = this.getDataValue("avatar");
-        return `/uploads/images/${avatar}`;
+        return avatar;
       },
     },
     createAt: {
@@ -42,10 +44,7 @@ const User = (sequelize, DataTypes) => {
       type: DataTypes.VIRTUAL,
       get() {
         const time = this.getDataValue("createAt");
-        if (time != null) return timeFormat(time);
-        else {
-          return time;
-        }
+        return time;
       },
     },
     updateAtStr: {
