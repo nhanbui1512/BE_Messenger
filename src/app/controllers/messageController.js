@@ -1,4 +1,4 @@
-const { MessageModel, RoomChatModel, UserModel } = require("../models");
+const { MessageModel, RoomChatModel, UserModel } = require('../models');
 
 class MessageController {
   async sendMessage(request, response, next) {
@@ -6,11 +6,17 @@ class MessageController {
       const content = request.body.content;
       const roomId = request.body.roomId;
 
+      const room = await RoomChatModel.findByPk(roomId);
+      if (!room) {
+        return response.status(400).json({
+          result: false,
+          message: 'Not found room',
+        });
+      }
       const newMessage = await MessageModel.create({
         userUserId: 1,
         content: content,
       });
-      const room = await RoomChatModel.findByPk(roomId);
       await room.addMessage(newMessage);
 
       return response.status(200).json({ result: true });
@@ -24,7 +30,7 @@ class MessageController {
       const room = await RoomChatModel.findByPk(roomid);
       const messages = await MessageModel.findAll({
         attributes: {
-          exclude: ["roomchatRoomId"],
+          exclude: ['roomchatRoomId'],
         },
         include: { model: UserModel },
         where: {

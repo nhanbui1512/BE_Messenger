@@ -1,4 +1,4 @@
-const { RoomChatModal, UserModel, UserRoomchatModal } = require("../models");
+const { RoomChatModal, UserModel } = require('../models');
 
 class RoomChatController {
   async getAll(req, res, next) {
@@ -7,7 +7,7 @@ class RoomChatController {
         model: UserModel,
         through: { attributes: [] },
         attributes: {
-          exclude: ["password"],
+          exclude: ['password'],
         },
       },
     });
@@ -29,13 +29,19 @@ class RoomChatController {
       const result = await room.addUsers(users);
 
       if (!result) {
-        return res.send("existed");
+        return res.send('existed');
       }
-      return res.send("join room successfully");
+      return res.send('join room successfully');
     } catch (error) {
       console.log(error.message);
-      return res.send("error");
+      return res.send('error');
     }
+  }
+
+  async createNewRoom(request, response, next) {
+    const userId = request.body.userId;
+
+    response.end();
   }
 }
 module.exports = new RoomChatController();
