@@ -16,8 +16,8 @@ const sequelize = new Sequelize('messenger', 'root', '', {
 
 const UserModel = User(sequelize);
 const RoomChatModel = RoomChat(sequelize);
-const MessageModel = Message(sequelize);
 const UserRoomchatModel = UserRoomchat(sequelize);
+const MessageModel = Message(sequelize);
 
 //realationship
 
