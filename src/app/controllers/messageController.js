@@ -1,18 +1,34 @@
-const { MessageModel, RoomChatModel, UserModel } = require('../models');
+const { MessageModel, RoomChatModel, UserRoomchatModel, UserModel } = require('../models');
 class MessageController {
   async sendMessage(request, response, next) {
-    try {
-      const content = request.body.content;
-      const roomId = request.body.roomId;
-      const userId = request.userId;
+    const content = request.body.content;
+    const roomId = request.body.roomId;
+    const userId = request.userId;
 
+    if (!roomId || !content)
+      return response.status(400).json({
+        result: false,
+        message: 'information is not completely filled',
+      });
+
+    try {
       const room = await RoomChatModel.findByPk(roomId);
-      if (!room) {
+      if (!room)
         return response.status(400).json({
           result: false,
           message: 'Not found room',
         });
-      }
+
+      const userInRoom = await UserRoomchatModel.findOne({
+        where: {
+          roomchatRoomId: roomId,
+          userUserId: userId,
+        },
+      });
+
+      if (!userInRoom)
+        return response.status(200).json({ result: false, message: 'user is not in this room' });
+
       const newMessage = await MessageModel.create({
         userUserId: userId,
         content: content,
