@@ -1,12 +1,12 @@
-const { Sequelize, DataTypes, Op, fn } = require("sequelize");
-const User = require("./userModel");
-const RoomChat = require("./roomChatModel");
-const Message = require("./messageModel");
-const UserRoomchat = require("./userRoomchatModel");
+const { Sequelize, DataTypes, Op, fn } = require('sequelize');
+const User = require('./userModel');
+const RoomChat = require('./roomChatModel');
+const Message = require('./messageModel');
+const UserRoomchat = require('./userRoomchatModel');
 
-const sequelize = new Sequelize("messenger", "root", "", {
-  host: "localhost",
-  dialect: "mysql",
+const sequelize = new Sequelize('messenger', 'root', '', {
+  host: 'localhost',
+  dialect: 'mysql',
   logging: false,
   define: {
     freezeTableName: true,
@@ -22,17 +22,17 @@ const UserRoomchatModel = UserRoomchat(sequelize);
 //realationship
 
 UserModel.hasMany(MessageModel, {
-  onDelete: "CASCADE",
+  onDelete: 'CASCADE',
 });
 MessageModel.belongsTo(UserModel, {
-  onDelete: "CASCADE",
+  onDelete: 'CASCADE',
 });
 
 RoomChatModel.hasMany(MessageModel, {
-  onDelete: "CASCADE",
+  onDelete: 'CASCADE',
 });
 MessageModel.belongsTo(RoomChatModel, {
-  onDelete: "CASCADE",
+  onDelete: 'CASCADE',
 });
 
 UserModel.belongsToMany(RoomChatModel, { through: UserRoomchatModel });
