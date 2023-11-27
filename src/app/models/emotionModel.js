@@ -1,23 +1,30 @@
 const { DataTypes } = require('sequelize');
 
-const Message = (sequelize) => {
-  return sequelize.define('messages', {
-    messageId: {
+function Emotion(sequelize) {
+  return sequelize.define('emotions', {
+    id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
-    content: {
+    name: {
       type: DataTypes.STRING,
+      allowNull: false,
+    },
+    icon: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     createAt: {
       type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
+    },
+    updateAt: {
+      type: DataTypes.DATE,
     },
     deleteAt: {
       type: DataTypes.DATE,
     },
   });
-};
+}
 
-module.exports = Message;
+module.exports = Emotion;

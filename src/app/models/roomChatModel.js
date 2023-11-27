@@ -1,7 +1,7 @@
-const { DataTypes } = require("sequelize");
+const { DataTypes } = require('sequelize');
 
 const RoomChat = (sequelize) => {
-  return sequelize.define("roomchats", {
+  return sequelize.define('roomchats', {
     roomId: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -22,7 +22,7 @@ const RoomChat = (sequelize) => {
     createAtStr: {
       type: DataTypes.VIRTUAL,
       get() {
-        const time = this.getDataValue("createAt");
+        const time = this.getDataValue('createAt');
         return time;
       },
     },

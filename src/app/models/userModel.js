@@ -1,7 +1,7 @@
-const { DataTypes } = require("sequelize");
+const { DataTypes } = require('sequelize');
 
 const User = (sequelize) => {
-  return sequelize.define("users", {
+  return sequelize.define('users', {
     userId: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -29,7 +29,7 @@ const User = (sequelize) => {
     avatar: {
       type: DataTypes.STRING,
       get() {
-        const avatar = this.getDataValue("avatar");
+        const avatar = this.getDataValue('avatar');
         return avatar;
       },
     },
@@ -43,14 +43,14 @@ const User = (sequelize) => {
     createAtStr: {
       type: DataTypes.VIRTUAL,
       get() {
-        const time = this.getDataValue("createAt");
+        const time = this.getDataValue('createAt');
         return time;
       },
     },
     updateAtStr: {
       type: DataTypes.VIRTUAL,
       get() {
-        const time = this.getDataValue("updateAt");
+        const time = this.getDataValue('updateAt');
         return time;
       },
     },
