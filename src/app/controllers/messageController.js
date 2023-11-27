@@ -25,20 +25,35 @@ class MessageController {
     }
   }
   async getMessagesInRoom(req, res, next) {
+    const currentPage = req.query.page || 1;
+    const itemsPerPage = req.query.per_page || 10; // Số bản ghi trên mỗi trang
+    const offset = (currentPage - 1) * itemsPerPage; // Tính OFFSET
+
+    const roomid = req.query.roomid;
+
+    if (!roomid) return res.status(400).json({ result: false, message: 'roomid is not attached' });
     try {
-      const roomid = req.query.roomid;
       const room = await RoomChatModel.findByPk(roomid);
       const messages = await MessageModel.findAll({
+        where: {
+          deleteAt: null,
+          roomchatRoomId: roomid,
+        },
         attributes: {
           exclude: ['roomchatRoomId'],
         },
-        include: { model: UserModel },
-        where: {
-          roomchatRoomId: roomid,
+        include: {
+          model: UserModel,
+          attributes: {
+            exclude: ['password', 'updateAt', 'createAt'],
+          },
         },
+        limit: Number(itemsPerPage),
+        offset: offset,
+        order: [['createAt', 'DESC']],
       });
 
-      return res.status(200).json({ room: room, messages: messages });
+      return res.status(200).json({ room: room, data: messages });
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }
