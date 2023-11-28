@@ -1,4 +1,4 @@
-const { UserModel, RoomChatModel, UserRoomchatModel } = require('../models');
+const { UserModel, RoomChatModel, UserRoomchatModel, MessageModel } = require('../models');
 
 class RoomChatController {
   async getAll(req, res, next) {
@@ -94,6 +94,7 @@ class RoomChatController {
   async getRoomOfUser(request, response, next) {
     const userId = request.userId;
     try {
+      //  ket qua truy van
       let res = await UserModel.findOne({
         where: {
           userId: userId,
@@ -101,16 +102,33 @@ class RoomChatController {
         include: {
           model: RoomChatModel,
           through: { attributes: [] },
-          include: {
-            model: UserModel,
-            attributes: {
-              exclude: ['password'],
+          include: [
+            {
+              model: MessageModel,
+              limit: 1,
+              order: [['createAt', 'DESC']],
+              attributes: {
+                exclude: ['roomchatRoomId'],
+              },
+              include: {
+                model: UserModel,
+                attributes: {
+                  exclude: ['password', 'createAt', 'updateAt'],
+                },
+              },
             },
-            through: { attributes: [] },
-          },
+            {
+              model: UserModel,
+              attributes: {
+                exclude: ['password'],
+              },
+              through: { attributes: [] },
+            },
+          ],
         },
       });
 
+      // convert sang JSON de xu ly ten phong
       res = res.toJSON();
       const rooms = res.roomchats;
 
@@ -123,7 +141,7 @@ class RoomChatController {
         }
       });
 
-      return response.status(200).json({ data: res });
+      return response.status(200).json({ data: res.roomchats });
     } catch (error) {
       return response.status(500).json({ message: error.message });
     }

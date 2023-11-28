@@ -1,7 +1,7 @@
-const token_require = require('../until/token');
-const { UserModel } = require('../models');
+const token_require = require("../until/token");
+const { UserModel } = require("../models");
 
-require('dotenv').config();
+require("dotenv").config();
 
 class LoginController {
   //GET all sales post
@@ -18,7 +18,7 @@ class LoginController {
       });
 
       if (user === null) {
-        return response.status(200).json({ result: false, message: 'email or password is wrong' });
+        return response.status(200).json({ result: false, message: "email or password is wrong" });
       } else {
         user = user.toJSON();
         const token = token_require.GenerateAccpectToken(user);

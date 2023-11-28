@@ -1,5 +1,4 @@
 const { UserModel, RoomChatModel } = require('../models');
-const RoomChat = require('../models/roomChatModel');
 
 class UserController {
   async getAllUser(req, res, next) {
