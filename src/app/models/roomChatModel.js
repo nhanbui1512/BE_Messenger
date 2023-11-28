@@ -7,6 +7,10 @@ const RoomChat = (sequelize) => {
       primaryKey: true,
       autoIncrement: true,
     },
+    roomName: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     numberUser: {
       type: DataTypes.INTEGER,
       defaultValue: 2,

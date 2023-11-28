@@ -4,7 +4,6 @@ dotenv.config();
 
 module.exports = {
   GenerateAccpectToken(user) {
-    console.log(user);
     return jwt.sign(
       {
         userId: user.userId,

@@ -1,4 +1,4 @@
-const { UserModel, RoomChatModel } = require('../models');
+const { UserModel, RoomChatModel, UserRoomchatModel } = require('../models');
 
 class RoomChatController {
   async getAll(req, res, next) {
@@ -90,5 +90,44 @@ class RoomChatController {
     await room.removeUser(user);
     return response.status(200).json({ result: true, message: 'Leave room successfully' });
   }
+
+  async getRoomOfUser(request, response, next) {
+    const userId = request.userId;
+    try {
+      let res = await UserModel.findOne({
+        where: {
+          userId: userId,
+        },
+        include: {
+          model: RoomChatModel,
+          through: { attributes: [] },
+          include: {
+            model: UserModel,
+            attributes: {
+              exclude: ['password'],
+            },
+            through: { attributes: [] },
+          },
+        },
+      });
+
+      res = res.toJSON();
+      const rooms = res.roomchats;
+
+      rooms.map((room) => {
+        if (room.roomName === null) {
+          let roomName = room.users.find((user) => {
+            return user.userId !== userId;
+          }).userName;
+          room.roomName = roomName;
+        }
+      });
+
+      return response.status(200).json({ data: res });
+    } catch (error) {
+      return response.status(500).json({ message: error.message });
+    }
+  }
 }
+
 module.exports = new RoomChatController();
