@@ -97,26 +97,31 @@ class MessageController {
     if (!roomid) return res.status(400).json({ result: false, message: 'roomid is not attached' });
     try {
       const room = await RoomChatModel.findByPk(roomid);
-      const messages = await MessageModel.findAll({
+      const data = await MessageGroupModel.findAll({
         where: {
-          deleteAt: null,
           roomchatRoomId: roomid,
         },
-        attributes: {
-          exclude: ['roomchatRoomId'],
-        },
-        include: {
-          model: UserModel,
-          attributes: {
-            exclude: ['password', 'updateAt', 'createAt'],
+        include: [
+          {
+            model: UserModel,
+            attributes: {
+              exclude: ['password', 'updateAt', 'createAt'],
+            },
           },
-        },
+          {
+            model: MessageModel,
+            order: [
+              ['messageId', 'DESC'],
+              ['createAt', 'DESC'],
+            ],
+          },
+        ],
         limit: Number(itemsPerPage),
         offset: offset,
         order: [['createAt', 'DESC']],
       });
 
-      return res.status(200).json({ room: room, data: messages });
+      return res.status(200).json({ room: room, data: data });
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }
