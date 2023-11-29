@@ -23,6 +23,15 @@ connection
     }
 
     sequelize
+      .authenticate()
+      .then(() => {
+        console.log('Connected to the database successfully');
+      })
+      .catch((err) => {
+        console.log('Connected to the database unsuccessfully');
+      });
+
+    sequelize
       .sync({ alter: true })
       .then(() => {
         console.log('synced');
@@ -42,5 +51,5 @@ app.use(express.static(path.join(__dirname, '/public')));
 route(app);
 
 app.listen(3000, () => {
-  console.log('app is listening');
+  console.log('app is listening on http://localhost:3000');
 });

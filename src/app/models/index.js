@@ -56,9 +56,10 @@ ReactionModel.belongsTo(UserModel, { onDelete: 'CASCADE' });
 
 module.exports = {
   sequelize,
-  UserModel,
-  RoomChatModel,
-  MessageModel,
-  UserRoomchatModel,
-  EmotionModel,
+  UserModel: sequelize.models.users,
+  RoomChatModel: sequelize.models.roomchats,
+  MessageModel: sequelize.models.messages,
+  UserRoomchatModel: sequelize.models.userRoomchat,
+  EmotionModel: sequelize.models.emotions,
+  MessageGroupModel: sequelize.models.messagegroups,
 };

@@ -1,4 +1,13 @@
-const { MessageModel, RoomChatModel, UserRoomchatModel, UserModel } = require('../models');
+const {
+  MessageModel,
+  RoomChatModel,
+  UserRoomchatModel,
+  UserModel,
+  MessageGroupModel,
+} = require('../models');
+
+const { formatTime } = require('../until/time');
+
 class MessageController {
   async sendMessage(request, response, next) {
     const content = request.body.content;
@@ -12,7 +21,19 @@ class MessageController {
       });
 
     try {
-      const room = await RoomChatModel.findByPk(roomId);
+      const room = await RoomChatModel.findByPk(roomId, {
+        include: {
+          model: MessageGroupModel,
+          limit: 1,
+          order: [['createAt', 'DESC']],
+          include: {
+            model: MessageModel,
+            attributes: {
+              exclude: ['messagegroupId', 'roomchatRoomId', 'userUserId'],
+            },
+          },
+        },
+      });
       if (!room)
         return response.status(400).json({
           result: false,
@@ -29,13 +50,39 @@ class MessageController {
       if (!userInRoom)
         return response.status(200).json({ result: false, message: 'user is not in this room' });
 
+      const msgGroup = room.messagegroups[0];
+
       const newMessage = await MessageModel.create({
         userUserId: userId,
         content: content,
       });
       await room.addMessage(newMessage);
 
-      return response.status(200).json({ result: true, newMessage });
+      if (!msgGroup) {
+        // nếu mà trong nhóm chưa có tin nhắn thì tạo mới msgGroup và thêm tin nhắn
+        const newMsgGroup = await MessageGroupModel.create({
+          userUserId: userId,
+          roomchatRoomId: roomId,
+        });
+        await newMsgGroup.addMessage(newMessage);
+      } else {
+        var current = new Date();
+        let minutes = Math.floor(Math.abs(current - msgGroup.createAt) / 60000);
+
+        if (minutes > 3 || msgGroup.userUserId !== userId) {
+          const newMsgGroup = await MessageGroupModel.create({
+            userUserId: userId,
+            roomchatRoomId: roomId,
+          });
+
+          await room.addMessage(newMessage);
+          await newMsgGroup.addMessage(newMessage);
+        } else {
+          msgGroup.addMessage(newMessage);
+        }
+      }
+
+      return response.status(200).json({ result: true, newMessage: newMessage });
     } catch (error) {
       return response.status(500).json({ message: error.message });
     }

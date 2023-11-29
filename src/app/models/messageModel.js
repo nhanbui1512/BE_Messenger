@@ -1,4 +1,4 @@
-const { DataTypes, DATE } = require('sequelize');
+const { DataTypes } = require('sequelize');
 const { formatTime } = require('../until/time');
 
 const Message = (sequelize) => {
