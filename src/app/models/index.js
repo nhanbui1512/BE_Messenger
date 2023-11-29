@@ -62,4 +62,5 @@ module.exports = {
   UserRoomchatModel: sequelize.models.userRoomchat,
   EmotionModel: sequelize.models.emotions,
   MessageGroupModel: sequelize.models.messagegroups,
+  ReactionModel: sequelize.models.reactions,
 };

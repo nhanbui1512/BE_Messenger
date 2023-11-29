@@ -1,4 +1,5 @@
 const { DataTypes } = require('sequelize');
+const { formatTime } = require('../until/time');
 
 function MessageGroup(sequelize) {
   return sequelize.define('messagegroups', {
@@ -10,6 +11,14 @@ function MessageGroup(sequelize) {
     createAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
+    },
+    createAtStr: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        const time = this.getDataValue('createAt');
+        const formatedTime = formatTime(time);
+        return `${formatedTime.hour}:${formatedTime.minute} ${formatedTime.day}/${formatedTime.month}/${formatedTime.year}`;
+      },
     },
   });
 }

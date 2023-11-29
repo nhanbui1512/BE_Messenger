@@ -4,6 +4,7 @@ const {
   UserRoomchatModel,
   UserModel,
   MessageGroupModel,
+  ReactionModel,
 } = require('../models');
 
 const { formatTime } = require('../until/time');
@@ -91,13 +92,13 @@ class MessageController {
     const currentPage = req.query.page || 1;
     const itemsPerPage = req.query.per_page || 10; // Số bản ghi trên mỗi trang
     const offset = (currentPage - 1) * itemsPerPage; // Tính OFFSET
-
+    const userId = req.userId;
     const roomid = req.query.roomid;
 
     if (!roomid) return res.status(400).json({ result: false, message: 'roomid is not attached' });
     try {
       const room = await RoomChatModel.findByPk(roomid);
-      const data = await MessageGroupModel.findAll({
+      var data = await MessageGroupModel.findAll({
         where: {
           roomchatRoomId: roomid,
         },
@@ -111,9 +112,12 @@ class MessageController {
           {
             model: MessageModel,
             order: [
-              ['messageId', 'DESC'],
-              ['createAt', 'DESC'],
+              ['createAt', 'ASC'],
+              ['messageId', 'ASC'],
             ],
+            include: {
+              model: ReactionModel,
+            },
           },
         ],
         limit: Number(itemsPerPage),
@@ -121,7 +125,13 @@ class MessageController {
         order: [['createAt', 'DESC']],
       });
 
-      return res.status(200).json({ room: room, data: data });
+      var JsonData = data.map((item) => {
+        item = item.toJSON();
+        item.myself = item.userUserId === userId;
+        return item;
+      });
+
+      return res.status(200).json({ room: room, data: JsonData });
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }

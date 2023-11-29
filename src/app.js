@@ -4,6 +4,7 @@ const app = express();
 const path = require('path');
 const route = require('./app/routes');
 const { Sequelize } = require('sequelize');
+const cors = require('cors');
 
 const connection = new Sequelize('', 'root', '', {
   dialect: 'mysql',
@@ -45,7 +46,7 @@ connection
   .catch((err) => {
     console.log(err.message);
   });
-
+app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '/public')));
 route(app);
