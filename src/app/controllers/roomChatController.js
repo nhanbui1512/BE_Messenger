@@ -133,7 +133,15 @@ class RoomChatController {
       const rooms = res.roomchats;
 
       rooms.map((room) => {
-        if (room.roomName === null) {
+        // neu phong chat chi co 2 nguoi thi tra ve avatar cua nguoi kia
+        if (room.users.length === 2) {
+          let avatarRoom = room.users.find((user) => {
+            return user.userId !== userId;
+          }).avatar;
+          room.avatar = avatarRoom;
+        }
+
+        if (room.users.length === 2) {
           let roomName = room.users.find((user) => {
             return user.userId !== userId;
           }).userName;

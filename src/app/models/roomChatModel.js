@@ -11,6 +11,13 @@ const RoomChat = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
+    avatar: {
+      type: DataTypes.STRING,
+      get() {
+        const avatar = this.getDataValue('avatar');
+        return avatar;
+      },
+    },
     numberUser: {
       type: DataTypes.INTEGER,
       defaultValue: 2,
