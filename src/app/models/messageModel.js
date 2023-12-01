@@ -30,23 +30,25 @@ const Message = (sequelize) => {
     last: {
       type: DataTypes.VIRTUAL,
       get() {
-        const currentTime = formatTime(new Date());
-        const createTime = formatTime(this.getDataValue('createAt'));
+        const currentTime = new Date();
+        const createTime = this.getDataValue('createAt');
 
-        const lastDays = currentTime.day - createTime.day;
+        const sapces = currentTime - createTime; // khoảng cách tính theo milliseconds
+
+        const lastDays = Math.floor(sapces / (60 * 60 * 24 * 1000)); // khoảng cách ngày
+
         if (lastDays === 0) {
-          const lastHour = currentTime.hour - createTime.hour;
+          const lastHour = Math.floor(sapces / (60 * 60 * 1000)); // khoảng cách giờ
           if (lastHour === 0) {
-            const lastMinutes = Number(currentTime.minute) - Number(createTime.minute);
-            if (lastMinutes === 0) return 'vừa xong';
+            const lastMinutes = Math.floor(sapces / (60 * 1000)); // khoảng cách phút
+            if (lastMinutes === 0) return 'Vừa xong';
             return `${lastMinutes} phút`;
           }
           return `${lastHour} giờ`;
         }
 
         if (lastDays >= 7) {
-          const days = (new Date() - this.getDataValue('createAt')) / (1000 * 3600 * 24);
-          const week = Math.floor(days / 7);
+          const week = Math.floor(lastDays / 7); // nếu ngày lớn hơn 7 thì quy về số tuần
           return `${week} tuần`;
         }
         return `${lastDays} ngày`;
