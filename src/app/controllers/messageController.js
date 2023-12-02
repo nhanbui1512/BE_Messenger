@@ -70,7 +70,7 @@ class MessageController {
         var current = new Date();
         let minutes = Math.floor(Math.abs(current - msgGroup.createAt) / 60000);
 
-        if (minutes > 3 || msgGroup.userUserId !== userId) {
+        if (minutes > 2 || msgGroup.userUserId !== userId) {
           const newMsgGroup = await MessageGroupModel.create({
             userUserId: userId,
             roomchatRoomId: roomId,
@@ -144,8 +144,7 @@ class MessageController {
       const message = await MessageModel.findByPk(messageId);
       if (!message)
         return response.status(400).json({ result: false, message: 'Not found message' });
-      const updatedDate = new Date();
-      message.deleteAt = updatedDate;
+      message.deleteAt = new Date();
       await message.save();
 
       return response.status(200).json({ result: true, message: 'Delete message successfully' });

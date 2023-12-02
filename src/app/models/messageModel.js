@@ -24,7 +24,7 @@ const Message = (sequelize) => {
       get() {
         const time = this.getDataValue('createAt');
         const formatedTime = formatTime(time);
-        return `${formatedTime.hour}:${formatedTime.minute}:${formatedTime.second} ${formatedTime.day}/${formatedTime.month}/${formatedTime.year}`;
+        return `${formatedTime.hour}:${formatedTime.minute} ${formatedTime.day}/${formatedTime.month}/${formatedTime.year}`;
       },
     },
     last: {
