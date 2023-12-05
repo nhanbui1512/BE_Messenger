@@ -66,24 +66,103 @@ class MessageController {
           roomchatRoomId: roomId,
         });
         await newMsgGroup.addMessage(newMessage);
+        newMessage.messagegroupId = newMsgGroup.id;
+
+        const result = await MessageGroupModel.findByPk(newMsgGroup.id, {
+          include: [
+            {
+              model: UserModel,
+              attributes: ['avatar', 'userId', 'userName', 'email', 'phoneNumber'],
+            },
+            {
+              model: MessageModel,
+              attributes: [
+                'createTimeStr',
+                'last',
+                'messageId',
+                'content',
+                'createAt',
+                'deleteAt',
+                'userUserId',
+                'roomchatRoomId',
+                'messagegroupId',
+              ],
+            },
+          ],
+        });
+
+        return response.status(200).json({ data: result });
       } else {
         var current = new Date();
         let minutes = Math.floor(Math.abs(current - msgGroup.createAt) / 60000);
 
         if (minutes > 2 || msgGroup.userUserId !== userId) {
+          // nếu mà nhóm tin nhắn cuối cùng được tạo ra cách k quá 2 phút
+          // hoặc ko phải của chính người gửi
+          // thì tạo mới nhóm tin nhắn và thêm 1 tin nhắn vào
           const newMsgGroup = await MessageGroupModel.create({
             userUserId: userId,
             roomchatRoomId: roomId,
           });
-
           await room.addMessage(newMessage);
           await newMsgGroup.addMessage(newMessage);
+
+          const result = await MessageGroupModel.findByPk(newMsgGroup.id, {
+            include: [
+              {
+                model: UserModel,
+                attributes: ['avatar', 'userId', 'userName', 'email', 'phoneNumber'],
+              },
+              {
+                model: MessageModel,
+                attributes: [
+                  'createTimeStr',
+                  'last',
+                  'messageId',
+                  'content',
+                  'createAt',
+                  'deleteAt',
+                  'userUserId',
+                  'roomchatRoomId',
+                  'messagegroupId',
+                ],
+              },
+            ],
+          });
+
+          return response.status(200).json({ data: result });
         } else {
+          // nếu nhóm tin nhắn quá 2 phút
+          // thêm tin nhắn vào nhóm cũ
           msgGroup.addMessage(newMessage);
+          newMessage.messagegroupId = msgGroup.id;
+          // trả về nhóm tin nhắn cũ cùng tin nhắn mới
+
+          const result = await MessageGroupModel.findByPk(msgGroup.id, {
+            include: [
+              {
+                model: UserModel,
+                attributes: ['avatar', 'userId', 'userName', 'email', 'phoneNumber'],
+              },
+              {
+                model: MessageModel,
+                attributes: [
+                  'createTimeStr',
+                  'last',
+                  'messageId',
+                  'content',
+                  'createAt',
+                  'deleteAt',
+                  'userUserId',
+                  'roomchatRoomId',
+                  'messagegroupId',
+                ],
+              },
+            ],
+          });
+          return response.status(200).json({ data: result });
         }
       }
-
-      return response.status(200).json({ result: true, newMessage: newMessage });
     } catch (error) {
       return response.status(500).json({ message: error.message });
     }
@@ -128,6 +207,12 @@ class MessageController {
       var JsonData = data.map((item) => {
         item = item.toJSON();
         item.myself = item.userUserId === userId;
+        for (let msg of item.messages) {
+          msg.reactions = {
+            data: [],
+            countReact: 0,
+          };
+        }
         return item;
       });
 
