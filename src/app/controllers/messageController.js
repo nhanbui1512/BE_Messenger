@@ -9,8 +9,6 @@ const {
 } = require('../models');
 const { reactionFormater } = require('../until/reaction');
 
-const { formatTime } = require('../until/time');
-
 class MessageController {
   async sendMessage(request, response, next) {
     const content = request.body.content;
@@ -70,7 +68,7 @@ class MessageController {
         await newMsgGroup.addMessage(newMessage);
         newMessage.messagegroupId = newMsgGroup.id;
 
-        const result = await MessageGroupModel.findByPk(newMsgGroup.id, {
+        var result = await MessageGroupModel.findByPk(newMsgGroup.id, {
           include: [
             {
               model: UserModel,
@@ -89,9 +87,25 @@ class MessageController {
                 'roomchatRoomId',
                 'messagegroupId',
               ],
+              order: [
+                ['createAt', 'ASC'],
+                ['messageId', 'ASC'],
+              ],
+              include: {
+                model: ReactionModel,
+                include: {
+                  model: EmotionModel,
+                },
+              },
             },
           ],
         });
+
+        result = result.toJSON();
+        result.myself = true;
+        for (var msg of result.messages) {
+          msg.reactions = reactionFormater(msg.reactions);
+        }
 
         return response.status(200).json({ data: result });
       } else {
@@ -99,7 +113,7 @@ class MessageController {
         let minutes = Math.floor(Math.abs(current - msgGroup.createAt) / 60000);
 
         if (minutes > 2 || msgGroup.userUserId !== userId) {
-          // nếu mà nhóm tin nhắn cuối cùng được tạo ra cách k quá 2 phút
+          // nếu mà nhóm tin nhắn cuối cùng được tạo ra cách  quá 2 phút
           // hoặc ko phải của chính người gửi
           // thì tạo mới nhóm tin nhắn và thêm 1 tin nhắn vào
           const newMsgGroup = await MessageGroupModel.create({
@@ -109,7 +123,7 @@ class MessageController {
           await room.addMessage(newMessage);
           await newMsgGroup.addMessage(newMessage);
 
-          const result = await MessageGroupModel.findByPk(newMsgGroup.id, {
+          var result = await MessageGroupModel.findByPk(newMsgGroup.id, {
             include: [
               {
                 model: UserModel,
@@ -128,19 +142,33 @@ class MessageController {
                   'roomchatRoomId',
                   'messagegroupId',
                 ],
+                order: [
+                  ['createAt', 'ASC'],
+                  ['messageId', 'ASC'],
+                ],
+                include: {
+                  model: ReactionModel,
+                  include: {
+                    model: EmotionModel,
+                  },
+                },
               },
             ],
           });
-
+          result = result.toJSON();
+          result.myself = true;
+          for (var msg of result.messages) {
+            msg.reactions = reactionFormater(msg.reactions);
+          }
           return response.status(200).json({ data: result });
         } else {
-          // nếu nhóm tin nhắn quá 2 phút
+          // nếu nhóm tin nhắn ko quá 2 phút
           // thêm tin nhắn vào nhóm cũ
-          msgGroup.addMessage(newMessage);
+          await msgGroup.addMessage(newMessage);
           newMessage.messagegroupId = msgGroup.id;
           // trả về nhóm tin nhắn cũ cùng tin nhắn mới
 
-          const result = await MessageGroupModel.findByPk(msgGroup.id, {
+          let result = await MessageGroupModel.findByPk(msgGroup.id, {
             include: [
               {
                 model: UserModel,
@@ -159,16 +187,33 @@ class MessageController {
                   'roomchatRoomId',
                   'messagegroupId',
                 ],
+                order: [
+                  ['createAt', 'ASC'],
+                  ['messageId', 'ASC'],
+                ],
+                include: {
+                  model: ReactionModel,
+                  include: {
+                    model: EmotionModel,
+                  },
+                },
               },
             ],
           });
+          result = result.toJSON();
+          result.myself = true;
+          for (var msg of result.messages) {
+            msg.reactions = reactionFormater(msg.reactions);
+          }
           return response.status(200).json({ data: result });
         }
       }
     } catch (error) {
+      console.log(error.message);
       return response.status(500).json({ message: error.message });
     }
   }
+
   async getMessagesInRoom(req, res, next) {
     const currentPage = req.query.page || 1;
     const itemsPerPage = req.query.per_page || 10; // Số bản ghi trên mỗi trang
@@ -178,7 +223,11 @@ class MessageController {
 
     if (!roomid) return res.status(400).json({ result: false, message: 'roomid is not attached' });
     try {
-      const room = await RoomChatModel.findByPk(roomid);
+      var room = await RoomChatModel.findByPk(roomid, {
+        include: {
+          model: UserModel,
+        },
+      });
       var data = await MessageGroupModel.findAll({
         where: {
           roomchatRoomId: roomid,
@@ -192,22 +241,24 @@ class MessageController {
           },
           {
             model: MessageModel,
-            order: [
-              ['createAt', 'ASC'],
-              ['messageId', 'ASC'],
-            ],
+            as: 'messages',
             include: {
               model: ReactionModel,
               include: {
                 model: EmotionModel,
               },
             },
+            order: [['messageId', 'ASC']],
           },
         ],
         limit: Number(itemsPerPage),
         offset: offset,
         order: [['createAt', 'DESC']],
       });
+
+      if (room.roomName === null) {
+        room.roomName = room.users.find((user) => user.userId !== userId).userName;
+      }
 
       var JsonData = data.map((item) => {
         item = item.toJSON();
@@ -216,6 +267,10 @@ class MessageController {
         item.messages = item.messages.map((msg) => {
           msg.reactions = reactionFormater(msg.reactions);
           return msg;
+        });
+
+        item.messages = item.messages.sort((a, b) => {
+          return a.messageId - b.messageId;
         });
         return item;
       });
