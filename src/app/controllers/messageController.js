@@ -5,7 +5,9 @@ const {
   UserModel,
   MessageGroupModel,
   ReactionModel,
+  EmotionModel,
 } = require('../models');
+const { reactionFormater } = require('../until/reaction');
 
 const { formatTime } = require('../until/time');
 
@@ -196,6 +198,9 @@ class MessageController {
             ],
             include: {
               model: ReactionModel,
+              include: {
+                model: EmotionModel,
+              },
             },
           },
         ],
@@ -207,12 +212,11 @@ class MessageController {
       var JsonData = data.map((item) => {
         item = item.toJSON();
         item.myself = item.userUserId === userId;
-        for (let msg of item.messages) {
-          msg.reactions = {
-            data: [],
-            countReact: 0,
-          };
-        }
+
+        item.messages = item.messages.map((msg) => {
+          msg.reactions = reactionFormater(msg.reactions);
+          return msg;
+        });
         return item;
       });
 

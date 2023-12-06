@@ -9,6 +9,7 @@ function Reaction(sequelize) {
     },
     createAt: {
       type: DataTypes.DATE,
+      defaultValue: new Date(),
     },
     deleteAt: {
       type: DataTypes.DATE,
