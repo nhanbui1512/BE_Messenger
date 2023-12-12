@@ -9,7 +9,7 @@ const isLoginMiddleware = require('../middlewares/isLoginMiddleware');
 
 function route(app) {
   app.use('/room', isLoginMiddleware, roomRouter);
-  app.use('/user', userRouter);
+  app.use('/user', isLoginMiddleware, userRouter);
   app.use('/message', isLoginMiddleware, messageRouter);
   app.use('/login', loginRouter);
   app.use('/emotion', emotionRouter);

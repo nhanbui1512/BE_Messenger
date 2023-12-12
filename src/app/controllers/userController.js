@@ -61,5 +61,47 @@ class UserController {
       return response.status(500).json({ message: error.message });
     }
   }
+
+  async getMyInfo(request, response, next) {
+    const userid = request.userId;
+    console.log(userid);
+    try {
+      const user = await UserModel.findByPk(userid, {
+        attributes: {
+          exclude: ['password'],
+        },
+      });
+      if (user !== null) return response.status(200).json({ data: user });
+      return response.status(400).json({ isSuccess: false, message: 'not found user' });
+    } catch (error) {
+      return response.status(500).json({ message: error.message });
+    }
+  }
+
+  async changePassword(req, response, next) {
+    const userid = req.userId;
+    const newPassword = req.body.newPassword;
+    const oldPassword = req.body.oldPassword;
+
+    if (!newPassword) return response.status(400).json({ message: 'newPassword must be attached' });
+    if (!oldPassword) return response.status(400).json({ message: 'oldPassword must be attached' });
+
+    try {
+      const user = await UserModel.findOne({
+        where: {
+          userId: userid,
+          password: oldPassword,
+        },
+      });
+
+      if (user === null)
+        return response.status(400).json({ isSuccess: false, message: 'Old password is wrong' });
+
+      user.password = newPassword;
+
+      const newData = await user.save();
+      return response.status(200).json({ isSuccess: true, user: newData });
+    } catch (error) {}
+  }
 }
 module.exports = new UserController();

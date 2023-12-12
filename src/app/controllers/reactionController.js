@@ -10,9 +10,6 @@ class ReactionController {
     if (!idmsg)
       return response.status(500).json({ result: false, message: 'idmsg must be attached' });
 
-    console.log(idmsg);
-    console.log(userId);
-    console.log(idEmotion);
     return response.send('create reactions');
   }
 }
