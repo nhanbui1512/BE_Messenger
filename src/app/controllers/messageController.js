@@ -68,7 +68,7 @@ class MessageController {
         await newMsgGroup.addMessage(newMessage);
         newMessage.messagegroupId = newMsgGroup.id;
 
-        var result = await MessageGroupModel.findByPk(newMsgGroup.id, {
+        var data = await MessageGroupModel.findByPk(newMsgGroup.id, {
           include: [
             {
               model: UserModel,
@@ -101,13 +101,13 @@ class MessageController {
           ],
         });
 
-        result = result.toJSON();
-        result.myself = true;
-        for (var msg of result.messages) {
+        data = data.toJSON();
+        data.myself = true;
+        for (var msg of data.messages) {
           msg.reactions = reactionFormater(msg.reactions);
         }
 
-        return response.status(200).json({ data: result });
+        return response.status(200).json({ data: data });
       } else {
         var current = new Date();
         let minutes = Math.floor(Math.abs(current - msgGroup.createAt) / 60000);
@@ -123,7 +123,7 @@ class MessageController {
           await room.addMessage(newMessage);
           await newMsgGroup.addMessage(newMessage);
 
-          var result = await MessageGroupModel.findByPk(newMsgGroup.id, {
+          let group = await MessageGroupModel.findByPk(newMsgGroup.id, {
             include: [
               {
                 model: UserModel,
@@ -155,20 +155,25 @@ class MessageController {
               },
             ],
           });
-          result = result.toJSON();
-          result.myself = true;
-          for (var msg of result.messages) {
+
+          var groupJson = group.toJSON();
+          groupJson.myself = true;
+          newMessage.messagegroupId = newMsgGroup.id;
+
+          for (var msg of groupJson.messages) {
             msg.reactions = reactionFormater(msg.reactions);
           }
-          return response.status(200).json({ data: result });
+
+          return response.status(200).json({ data: groupJson });
         } else {
           // nếu nhóm tin nhắn ko quá 2 phút
           // thêm tin nhắn vào nhóm cũ
+          await room.addMessage(newMessage);
           await msgGroup.addMessage(newMessage);
           newMessage.messagegroupId = msgGroup.id;
           // trả về nhóm tin nhắn cũ cùng tin nhắn mới
 
-          let result = await MessageGroupModel.findByPk(msgGroup.id, {
+          let group = await MessageGroupModel.findByPk(msgGroup.id, {
             include: [
               {
                 model: UserModel,
@@ -200,12 +205,13 @@ class MessageController {
               },
             ],
           });
-          result = result.toJSON();
-          result.myself = true;
-          for (var msg of result.messages) {
+
+          var groupJson = group.toJSON();
+          groupJson.myself = true;
+          for (var msg of groupJson.messages) {
             msg.reactions = reactionFormater(msg.reactions);
           }
-          return response.status(200).json({ data: result });
+          return response.status(200).json({ data: groupJson });
         }
       }
     } catch (error) {
@@ -256,6 +262,7 @@ class MessageController {
         order: [['createAt', 'DESC']],
       });
 
+      data.reverse();
       if (room.roomName === null) {
         room.roomName = room.users.find((user) => user.userId !== userId).userName;
       }

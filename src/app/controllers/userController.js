@@ -1,4 +1,5 @@
 const { UserModel, RoomChatModel } = require('../models');
+const { Op } = require('sequelize');
 
 class UserController {
   async getAllUser(req, res, next) {
@@ -64,7 +65,6 @@ class UserController {
 
   async getMyInfo(request, response, next) {
     const userid = request.userId;
-    console.log(userid);
     try {
       const user = await UserModel.findByPk(userid, {
         attributes: {
@@ -102,6 +102,33 @@ class UserController {
       const newData = await user.save();
       return response.status(200).json({ isSuccess: true, user: newData });
     } catch (error) {}
+  }
+
+  async searchUser(req, response, next) {
+    const valueSearch = req.query.search;
+    console.log(valueSearch);
+    if (!valueSearch)
+      return response.status(400).json({ isSuccess: false, message: 'search must be attached' });
+
+    try {
+      const users = await UserModel.findAndCountAll({
+        where: {
+          [Op.or]: [
+            { email: { [Op.like]: `%${valueSearch}%` } },
+            {
+              userName: {
+                [Op.like]: `%${valueSearch}%`,
+              },
+            },
+          ],
+        },
+      });
+
+      return response.status(200).json({ isSuccess: true, total: users.count, data: users.rows });
+    } catch (error) {
+      console.log(error.message);
+      return response.status(500).json({ isSuccess: false, message: error.message });
+    }
   }
 }
 module.exports = new UserController();
