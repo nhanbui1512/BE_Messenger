@@ -1,10 +1,13 @@
 const express = require('express');
 const { sequelize } = require('./app/models');
+require('express-async-errors');
+
 const app = express();
 const path = require('path');
 const route = require('./app/routes');
 const { Sequelize } = require('sequelize');
 const cors = require('cors');
+const errorHandle = require('./app/middlewares/errorHandler');
 
 const connection = new Sequelize('', 'root', '', {
   dialect: 'mysql',
@@ -49,7 +52,11 @@ connection
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '/public')));
+
+//config routes
 route(app);
+
+app.use(errorHandle);
 
 app.listen(3000, () => {
   console.log('app is listening on http://localhost:3000');

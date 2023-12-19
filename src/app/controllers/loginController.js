@@ -15,6 +15,9 @@ class LoginController {
           email: email,
           password: password,
         },
+        attributes: {
+          exclude: ['password'],
+        },
       });
 
       if (user === null) {
@@ -22,7 +25,7 @@ class LoginController {
       } else {
         user = user.toJSON();
         const token = token_require.GenerateAccpectToken(user);
-        return response.status(200).json({ result: true, token: token });
+        return response.status(200).json({ result: true, token: token, user: user });
       }
     } catch (error) {
       console.log(error);

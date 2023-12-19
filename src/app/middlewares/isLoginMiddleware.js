@@ -1,5 +1,6 @@
-require('dotenv').config();
+const AuthorizeError = require('../errors/AuthorizeError');
 
+require('dotenv').config();
 const jwt = require('jsonwebtoken');
 
 const isLoginMiddleWare = (req, response, next) => {
@@ -13,12 +14,10 @@ const isLoginMiddleWare = (req, response, next) => {
       req.userName = decode.userName;
       next();
     } catch (error) {
-      response.status(200).json({ result: false, message: 'Can Phai Login' });
-      return;
+      throw new AuthorizeError('Must be Login');
     }
   } else {
-    response.status(200).json({ result: false, message: 'Can Phai Login' });
-    return;
+    throw new AuthorizeError('Must be Login');
   }
 };
 

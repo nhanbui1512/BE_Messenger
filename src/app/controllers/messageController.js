@@ -289,16 +289,25 @@ class MessageController {
   }
   async deleteMessage(request, response, next) {
     const messageId = request.query.message_id;
+    const userid = request.userId;
+
     if (!messageId)
-      return response.status(400).json({ result: false, message: 'Message id is not attatch' });
+      return response.status(400).json({ isSuccess: false, message: 'Message id is not attatch' });
     try {
-      const message = await MessageModel.findByPk(messageId);
+      const message = await MessageModel.findOne({
+        where: {
+          messageId: messageId,
+          userUserId: userid,
+        },
+      });
       if (!message)
-        return response.status(400).json({ result: false, message: 'Not found message' });
+        return response.status(400).json({ isSuccess: false, message: 'Not found message' });
       message.deleteAt = new Date();
       await message.save();
 
-      return response.status(200).json({ result: true, message: 'Delete message successfully' });
+      return response
+        .status(200)
+        .json({ isSuccess: true, message: 'Delete message successfully', message: message });
     } catch (error) {
       return response.status(500).json({ message: error.message });
     }
