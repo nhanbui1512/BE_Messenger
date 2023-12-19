@@ -104,7 +104,7 @@ class UserController {
     } catch (error) {}
   }
 
-  async searchUser(req, response, next) {
+  async findUser(req, response, next) {
     const valueSearch = req.query.search;
     console.log(valueSearch);
     if (!valueSearch)

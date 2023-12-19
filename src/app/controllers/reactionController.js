@@ -56,29 +56,22 @@ class ReactionController {
     const userId = req.userId;
     const msgId = req.query.msg_id;
 
-    if (!msgId)
-      return response.status(400).json({ isSuccess: false, message: 'msg_id must be attached' });
+    if (!msgId) throw new ValidationError({ msg_id: 'msg_id must be attached' });
 
-    try {
-      const reaction = await ReactionModel.findOne({
-        where: {
-          userUserId: userId,
-          messageMessageId: msgId,
-        },
-      });
+    const reaction = await ReactionModel.findOne({
+      where: {
+        userUserId: userId,
+        messageMessageId: msgId,
+      },
+    });
 
-      if (reaction === null)
-        return response.status(400).json({ isSuccess: false, message: 'not found reaction' });
+    if (reaction === null) throw new NotFoundError({ reaction: 'Reaction is not found' });
 
-      reaction.deleteAt = new Date();
-      await reaction.save();
+    await reaction.destroy();
 
-      return response
-        .status(200)
-        .json({ isSuccess: true, message: 'delete reaction successfuly', reaction: reaction });
-    } catch (error) {
-      return response.status(500).json({ isSuccess: false, message: error.message });
-    }
+    return response
+      .status(200)
+      .json({ isSuccess: true, message: 'delete reaction successfuly', reaction: reaction });
   }
 }
 
