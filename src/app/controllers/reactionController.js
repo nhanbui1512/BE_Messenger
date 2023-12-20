@@ -37,7 +37,6 @@ class ReactionController {
       where: {
         userUserId: userId,
         messageMessageId: idmsg,
-        emotionId: emotion.id,
       },
     });
 
@@ -47,9 +46,24 @@ class ReactionController {
         userUserId: userId,
       });
       await emotion.addReaction(newReaction);
+
+      return response.status(200).json({
+        isSuccess: true,
+        message: 'Create reaction successfully',
+        reaction: newReaction,
+      });
     }
 
-    return response.status(200).json({ isSuccess: true, message: 'Create reaction successfully' });
+    if (isExistReaction.emotionId !== emotion.id) {
+      isExistReaction.emotionId = emotion.id;
+      await isExistReaction.save();
+    }
+
+    return response.status(200).json({
+      isSuccess: true,
+      message: 'Create reaction successfully',
+      reaction: isExistReaction,
+    });
   }
 
   async deleteReaction(req, response, next) {

@@ -234,6 +234,15 @@ class MessageController {
           model: UserModel,
         },
       });
+
+      room = room.toJSON();
+      if (room.users.length === 2 && room.avatar === null) {
+        let avatarRoom = room.users.find((user) => {
+          return user.userId !== userId;
+        }).avatar;
+        room.avatar = avatarRoom;
+      }
+
       var data = await MessageGroupModel.findAll({
         where: {
           roomchatRoomId: roomid,

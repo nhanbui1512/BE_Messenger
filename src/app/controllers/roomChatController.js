@@ -149,7 +149,7 @@ class RoomChatController {
         }
 
         if (room.messages[0] && room.messages[0].userUserId === userId)
-          room.messages[0].userName = 'Bạn';
+          room.messages[0].user.userName = 'Bạn';
       });
 
       return response.status(200).json({ data: res.roomchats });

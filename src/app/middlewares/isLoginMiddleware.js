@@ -14,10 +14,12 @@ const isLoginMiddleWare = (req, response, next) => {
       req.userName = decode.userName;
       next();
     } catch (error) {
-      throw new AuthorizeError('Must be Login');
+      throw new AuthorizeError({ authorize: 'Must be Login' });
     }
   } else {
-    throw new AuthorizeError('Must be Login');
+    throw new AuthorizeError({
+      authorize: 'Must be Login',
+    });
   }
 };
 

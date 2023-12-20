@@ -29,7 +29,9 @@ const User = (sequelize) => {
     avatar: {
       type: DataTypes.STRING,
       get() {
-        const avatar = this.getDataValue('avatar');
+        var avatar = this.getDataValue('avatar');
+        if (avatar === null) return avatar;
+        avatar = `${process.env.DOMAIN}/images/${avatar}`;
         return avatar;
       },
     },
