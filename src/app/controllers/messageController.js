@@ -1,3 +1,5 @@
+const ValidationError = require('../errors/ValidationError');
+
 const {
   MessageModel,
   RoomChatModel,
@@ -8,6 +10,7 @@ const {
   EmotionModel,
 } = require('../models');
 const { reactionFormater } = require('../until/reaction');
+const NotFoundError = require('../errors/NotFoundError');
 
 class MessageController {
   async sendMessage(request, response, next) {
@@ -257,6 +260,9 @@ class MessageController {
           {
             model: MessageModel,
             as: 'messages',
+            where: {
+              deleteAt: null,
+            },
             include: {
               model: ReactionModel,
               include: {
@@ -296,30 +302,29 @@ class MessageController {
       return res.status(500).json({ message: error.message });
     }
   }
+
   async deleteMessage(request, response, next) {
     const messageId = request.query.message_id;
     const userid = request.userId;
 
-    if (!messageId)
-      return response.status(400).json({ isSuccess: false, message: 'Message id is not attatch' });
-    try {
-      const message = await MessageModel.findOne({
-        where: {
-          messageId: messageId,
-          userUserId: userid,
-        },
-      });
-      if (!message)
-        return response.status(400).json({ isSuccess: false, message: 'Not found message' });
-      message.deleteAt = new Date();
-      await message.save();
+    if (!messageId) throw new ValidationError({ message_id: 'message_id must be attached' });
 
-      return response
-        .status(200)
-        .json({ isSuccess: true, message: 'Delete message successfully', message: message });
-    } catch (error) {
-      return response.status(500).json({ message: error.message });
-    }
+    const message = await MessageModel.findOne({
+      where: {
+        messageId: messageId,
+        userUserId: userid,
+        deleteAt: null,
+      },
+    });
+
+    if (message === null) throw new NotFoundError({ message: 'Not found Message' });
+
+    message.deleteAt = new Date();
+    await message.save();
+
+    return response
+      .status(200)
+      .json({ isSuccess: true, message: 'Delete message successfully', message: message });
   }
 }
 

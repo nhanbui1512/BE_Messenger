@@ -1,7 +1,14 @@
-const ValidationError = require('../errors/validationError');
+const ValidationError = require('../errors/ValidationError');
 const NotFoundError = require('../errors/NotFoundError');
-
-const { ReactionModel, EmotionModel, MessageModel } = require('../models');
+const { reactionFormater } = require('../until/reaction');
+const {
+  ReactionModel,
+  EmotionModel,
+  MessageModel,
+  RoomChatModel,
+  UserModel,
+  UserRoomchatModel,
+} = require('../models');
 class ReactionController {
   async createReaction(req, response, next) {
     const idmsg = req.query.idmsg;
@@ -25,9 +32,22 @@ class ReactionController {
     const msg = await MessageModel.findOne({
       where: {
         messageId: idmsg,
-        userUserId: userId,
+      },
+      include: {
+        model: RoomChatModel,
       },
     });
+
+    const isExistUserInRoom = await UserRoomchatModel.findOne({
+      // check user in room
+      where: {
+        userUserId: userId,
+        roomchatRoomId: msg.roomchat.roomId,
+      },
+    });
+
+    if (isExistUserInRoom === null)
+      throw new NotFoundError({ user: 'User is not exist in the room chat' });
 
     if (msg === null) errors.push({ message: 'message not found' });
 
@@ -45,25 +65,58 @@ class ReactionController {
         messageMessageId: idmsg,
         userUserId: userId,
       });
+
       await emotion.addReaction(newReaction);
+
+      var message = await MessageModel.findOne({
+        where: {
+          messageId: idmsg,
+        },
+        include: {
+          model: ReactionModel,
+          include: {
+            model: EmotionModel,
+          },
+        },
+      });
+
+      message = message.toJSON();
+      message.reactions = reactionFormater(message.reactions);
 
       return response.status(200).json({
         isSuccess: true,
         message: 'Create reaction successfully',
         reaction: newReaction,
+        dataMessage: message,
+      });
+    } else {
+      if (isExistReaction.emotionId !== emotion.id) {
+        isExistReaction.emotionId = emotion.id;
+        await isExistReaction.save();
+      }
+
+      var message = await MessageModel.findOne({
+        where: {
+          messageId: idmsg,
+        },
+        include: {
+          model: ReactionModel,
+          include: {
+            model: EmotionModel,
+          },
+        },
+      });
+
+      message = message.toJSON();
+      message.reactions = reactionFormater(message.reactions);
+
+      return response.status(200).json({
+        isSuccess: true,
+        message: 'Create reaction successfully',
+        reaction: isExistReaction,
+        dataMessage: message,
       });
     }
-
-    if (isExistReaction.emotionId !== emotion.id) {
-      isExistReaction.emotionId = emotion.id;
-      await isExistReaction.save();
-    }
-
-    return response.status(200).json({
-      isSuccess: true,
-      message: 'Create reaction successfully',
-      reaction: isExistReaction,
-    });
   }
 
   async deleteReaction(req, response, next) {

@@ -13,11 +13,12 @@ class UserController {
       userName: request.body.userName,
       phoneNumber: request.body.phoneNumber,
       password: request.body.password,
+      avatar: request.body.avatar || null,
     };
 
     if (!data.email || !data.userName || !data.phoneNumber || !data.password)
       return response
-        .status(400)
+        .status(422)
         .json({ result: false, message: 'The data is not completely filled in' });
 
     try {
@@ -106,7 +107,6 @@ class UserController {
 
   async findUser(req, response, next) {
     const valueSearch = req.query.search;
-    console.log(valueSearch);
     if (!valueSearch)
       return response.status(400).json({ isSuccess: false, message: 'search must be attached' });
 
