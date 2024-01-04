@@ -1,3 +1,6 @@
+const NotFoundError = require('../errors/NotFoundError');
+const ValidationError = require('../errors/ValidationError');
+
 const { UserModel, RoomChatModel, UserRoomchatModel, MessageModel } = require('../models');
 
 class RoomChatController {
@@ -35,7 +38,10 @@ class RoomChatController {
         if (!result) {
           return res.send('existed');
         }
-        return res.send('join room successfully');
+        return res.status(200).json({
+          isSuccess: true,
+          message: 'Add user into room successfully',
+        });
       } else {
         return res.status(400).json({ result: false, message: 'room not found' });
       }
@@ -156,6 +162,49 @@ class RoomChatController {
     } catch (error) {
       return response.status(500).json({ message: error.message });
     }
+  }
+
+  async kickMember(req, response, next) {
+    const memberId = req.query.member_id;
+    const userId = req.userId;
+    const roomId = req.query.room_id;
+
+    const errors = [];
+
+    if (!memberId) throw new ValidationError({ member_id: 'member_id must be attached' });
+    if (!roomId) throw new ValidationError({ room_id: 'room_id must be attached' });
+
+    if (isNaN(Number(memberId))) errors.push({ member_id: 'member_id must be type of Integer' });
+    if (isNaN(Number(roomId))) errors.push({ room_id: 'room_id must be type of Integer' });
+
+    if (errors.length > 0) throw new ValidationError(errors);
+    const isInRoom = await UserRoomchatModel.findOne({
+      where: {
+        userUserId: userId,
+        roomchatRoomId: roomId,
+      },
+    });
+
+    if (isInRoom === null)
+      throw new NotFoundError({
+        user: 'User is not in this room',
+      });
+
+    const member = await UserRoomchatModel.findOne({
+      where: {
+        roomchatRoomId: roomId,
+        userUserId: memberId,
+      },
+    });
+
+    if (member === null) throw new NotFoundError({ member: 'Member is not found in this room' });
+    else {
+      member.leaveAt = new Date();
+      member.deleteBy = userId;
+      await member.save();
+    }
+
+    return response.status(200).json({});
   }
 }
 

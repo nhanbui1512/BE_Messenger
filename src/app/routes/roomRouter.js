@@ -8,4 +8,6 @@ Router.get('/get-room', roomChatController.getRoomOfUser);
 Router.post('/create', roomChatController.createNewRoom);
 Router.post('/add-users', roomChatController.addUserIntoRoom);
 Router.put('/leave', roomChatController.leaveRoom);
+
+Router.delete('/kick', roomChatController.kickMember);
 module.exports = Router;

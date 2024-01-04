@@ -1,7 +1,7 @@
-const { DataTypes } = require("sequelize");
+const { DataTypes } = require('sequelize');
 
 const UserRoomchat = (sequelize) => {
-  return sequelize.define("userRoomchat", {
+  return sequelize.define('userRoomchat', {
     idUserRoom: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -13,6 +13,9 @@ const UserRoomchat = (sequelize) => {
     },
     leaveAt: {
       type: DataTypes.DATE,
+    },
+    deleteBy: {
+      type: DataTypes.INTEGER,
     },
   });
 };

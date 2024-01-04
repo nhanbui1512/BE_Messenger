@@ -36,6 +36,15 @@ MessageModel.belongsTo(RoomChatModel, { onDelete: 'CASCADE' });
 UserModel.belongsToMany(RoomChatModel, { through: UserRoomchatModel }); // USER - USER_ROOM - ROOM
 RoomChatModel.belongsToMany(UserModel, { through: UserRoomchatModel });
 
+UserModel.hasMany(UserRoomchatModel, {
+  foreignKey: 'deleteBy',
+  onDelete: 'CASCADE',
+});
+UserRoomchatModel.belongsTo(UserModel, {
+  foreignKey: 'deleteBy',
+  onDelete: 'CASCADE',
+});
+
 MessageModel.hasMany(ReactionModel, { onDelete: 'CASCADE' }); // REACTIONS vs MESSAGES
 ReactionModel.belongsTo(MessageModel, { onDelete: 'CASCADE' });
 

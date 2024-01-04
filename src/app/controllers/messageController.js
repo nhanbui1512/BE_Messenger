@@ -11,6 +11,7 @@ const {
 } = require('../models');
 const { reactionFormater } = require('../until/reaction');
 const NotFoundError = require('../errors/NotFoundError');
+const { Op } = require('sequelize');
 
 class MessageController {
   async sendMessage(request, response, next) {
@@ -325,6 +326,42 @@ class MessageController {
     return response
       .status(200)
       .json({ isSuccess: true, message: 'Delete message successfully', message: message });
+  }
+
+  async findMessageInRoom(req, response, next) {
+    const message = req.query.message;
+    const userId = req.userId;
+    const roomId = req.query.room_id;
+
+    if (!roomId)
+      throw new ValidationError({
+        room_id: 'room_id must be attached',
+      });
+
+    if (isNaN(Number(roomId)))
+      throw new ValidationError({ room_id: 'room_id must be of type Integer' });
+
+    if (!message)
+      throw new ValidationError({
+        message: 'message must be attached',
+      });
+
+    if (message.trim() === '') throw new ValidationError({ message: 'message is invalid' });
+
+    const messages = await MessageModel.findAll({
+      where: {
+        userUserId: userId,
+        roomchatRoomId: roomId,
+        content: {
+          [Op.like]: `%${message}%`,
+        },
+      },
+    });
+
+    return response.status(200).json({
+      isSuccess: true,
+      data: messages,
+    });
   }
 }
 

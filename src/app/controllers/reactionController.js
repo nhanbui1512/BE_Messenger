@@ -136,9 +136,24 @@ class ReactionController {
 
     await reaction.destroy();
 
-    return response
-      .status(200)
-      .json({ isSuccess: true, message: 'delete reaction successfuly', reaction: reaction });
+    var message = await MessageModel.findByPk(msgId, {
+      include: {
+        model: ReactionModel,
+        include: {
+          model: EmotionModel,
+        },
+      },
+    });
+
+    message = message.toJSON();
+    message.reactions = reactionFormater(message.reactions);
+
+    return response.status(200).json({
+      isSuccess: true,
+      message: 'Delete reaction successfuly',
+      reaction: reaction,
+      dataMessage: message,
+    });
   }
 }
 
