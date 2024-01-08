@@ -204,7 +204,10 @@ class RoomChatController {
       await member.save();
     }
 
-    return response.status(200).json({});
+    return response.status(200).json({
+      isSuccess: true,
+      message: 'kick user successfully',
+    });
   }
 }
 

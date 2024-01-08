@@ -6,6 +6,7 @@ const UserRoomchat = require('./userRoomchatModel');
 const Emotion = require('./emotionModel');
 const Reaction = require('./reactionModel');
 const MessageGroup = require('./messageGroupModel');
+const Image = require('./imagesModel');
 
 const sequelize = new Sequelize('messenger', 'root', '', {
   host: 'localhost',
@@ -24,6 +25,7 @@ const MessageModel = Message(sequelize);
 const EmotionModel = Emotion(sequelize);
 const ReactionModel = Reaction(sequelize);
 const MessageGroupModel = MessageGroup(sequelize);
+const ImageModel = Image(sequelize);
 
 //realationship
 
@@ -62,6 +64,12 @@ ReactionModel.belongsTo(EmotionModel, { onDelete: 'CASCADE' });
 
 UserModel.hasMany(ReactionModel, { onDelete: 'CASCADE' }); // USER vs REACTIONS
 ReactionModel.belongsTo(UserModel, { onDelete: 'CASCADE' });
+
+UserModel.hasMany(ImageModel, { onDelete: 'CASCADE' }); // USER - IMAGE
+ImageModel.belongsTo(UserModel, { onDelete: 'CASCADE' });
+
+MessageModel.hasMany(ImageModel, { onDelete: 'CASCADE' }); // MESSAGE - IMAGE
+ImageModel.belongsTo(MessageModel, { onDelete: 'CASCADE' });
 
 module.exports = {
   sequelize,
