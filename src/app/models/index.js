@@ -68,8 +68,12 @@ ReactionModel.belongsTo(UserModel, { onDelete: 'CASCADE' });
 UserModel.hasMany(ImageModel, { onDelete: 'CASCADE' }); // USER - IMAGE
 ImageModel.belongsTo(UserModel, { onDelete: 'CASCADE' });
 
-MessageModel.hasMany(ImageModel, { onDelete: 'CASCADE' }); // MESSAGE - IMAGE
+// MessageModel.(ImageModel, { onDelete: 'CASCADE' }); // MESSAGE - IMAGE
+MessageModel.hasMany(ImageModel, { onDelete: 'CASCADE' });
 ImageModel.belongsTo(MessageModel, { onDelete: 'CASCADE' });
+
+RoomChatModel.hasMany(ImageModel, { onDelete: 'CASCADE' }); // ROOM CHAT - IMAGE
+ImageModel.belongsTo(RoomChatModel, { onDelete: 'CASCADE' });
 
 module.exports = {
   sequelize,
@@ -80,4 +84,5 @@ module.exports = {
   EmotionModel: sequelize.models.emotions,
   MessageGroupModel: sequelize.models.messagegroups,
   ReactionModel: sequelize.models.reactions,
+  ImageModel: sequelize.models.images,
 };

@@ -10,6 +10,12 @@ function Image(sequelize) {
     },
     fileUrl: {
       type: DataTypes.STRING,
+      get() {
+        var fileUrl = this.getDataValue('fileUrl');
+        if (fileUrl === null) return fileUrl;
+        fileUrl = `${process.env.DOMAIN}/uploads/images/${fileUrl}`;
+        return fileUrl;
+      },
     },
     createAt: {
       type: DataTypes.DATE,
